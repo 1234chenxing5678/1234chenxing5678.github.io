@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1.前文：        在做CTF的misc题目时经常会碰到需要密码的zip文件，打开这种需要密码的方法无非就这三种：    （1）根据提示或其他文件解出密码     （2）暴力破解     （3）伪加密修改      在这里我们讲一下第三个伪加密的原理和修改方法。  2.原理：        1.压缩源文件数据区：          50 4B 03 04：这是头文件标记  （0x04034b">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1.前文：        在做CTF的misc题目时经常会碰到需要密码的zip文件，打开这种需要密码的方法无非就这三种：    （1）根据提示或其他文件解出密码     （2）暴力破解     （3）伪加密修改      在这里我们讲一下第三个伪加密的原理和修改方法。  2.原理：        1.压缩源文件数据区：          50 4B 03 04：这是头文件标记  （0x04034b">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-02-15T14:30:42.943Z">
+<meta property="article:modified_time" content="2023-02-15T14:31:02.962Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-解密解答" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/" class="article-date">
+  <time class="dt-published" datetime="2023-02-15T14:30:42.943Z" itemprop="datePublished">2023-02-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>1.前文：<br>        在做CTF的misc题目时经常会碰到需要密码的zip文件，打开这种需要密码的方法无非就这三种：</p>
+<pre><code>   （1）根据提示或其他文件解出密码
+
+   （2）暴力破解
+
+   （3）伪加密修改
+
+    在这里我们讲一下第三个伪加密的原理和修改方法。
+</code></pre>
+<p>2.原理：<br>        1.压缩源文件数据区：<br>          50 4B 03 04：这是头文件标记  （0x04034b50）<br>          14 00：解压文件所需 pkware 版本<br>          00 00：全局方式位标记（判断有无加密）<br>          08 00：压缩方式<br>          5A 7E：最后修改文件时间<br>          F7 46：最后修改文件日期</p>
+<pre><code>      2.压缩源文件目录区：
+     50 4B 01 02：目录中文件文件头标记  （0x02014b50）
+     1F 00：压缩使用的 pkware 版本
+     14 00：解压文件所需 pkware 版本
+     00 00：全局方式位标记（判断是否为伪加密）
+     08 00：压缩方式
+      5A 7E：最后修改文件时间
+      F7 46：最后修改文件日期
+
+      3.压缩源文件目录结束标志：
+     50 4B 05 06：目录结束标记
+     00 00：当前磁盘编号
+     00 00：目录区开始磁盘编号
+     01 00：本磁盘上纪录总数
+     01 00：目录区中纪录总数
+     59 00 00 00：目录区尺寸大小
+     3E 00 00 00：目录区对第一张磁盘的偏移量
+     00 00：ZIP 文件注释长度
+</code></pre>
+<p>3.判断是否加密：<br>        注意：</p>
+<p>全局方式位标记的四个数字中只有第二个数字对其有影响，其它的不管为何值，都不影响它的加密属性，即：<br>                                             第二个数字为奇数时 –&gt;加密<br>                                             第二个数字为偶数时 –&gt;未加密</p>
+<pre><code>    1.无加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为00 00  （50 4B 03 04 14 00 后）<br>且压缩源文件目录区的全局方式位标记应当为00 00   （50 4B 01 02 14 00 后）</p>
+<pre><code>    2.伪加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为 00 00  （50 4B 03 04 14 00 后）<br>且压缩源文件目录区的全局方式位标记应当为 09 00   （50 4B 01 02 14 00 后）</p>
+<pre><code>    3.真加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为09 00  （50 4B 03 04 14 00 后） </p>
+<p>且压缩源文件目录区的全局方式位标记应当为09 00  （50 4B 01 02 14 00 后） </p>
+<p>4.修改方法：<br>        确定是伪加密后就需要将其修改为无加密，方法很简单，就是将压缩源文件目录区的全局方式位标记从09 00改为00 00。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/" data-id="cle5sjeyi0001dsl2gkgtcobm" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/02/15/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/01/14/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">January 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/02/15/%5BSUCTF%202019%5DEasySQL1/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/15/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/01/14/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

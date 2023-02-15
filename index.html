@@ -71,10 +71,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-未命名的Markdown文件" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+    <article id="post-[SUCTF 2019]EasySQL1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2023/01/16/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/" class="article-date">
-  <time class="dt-published" datetime="2023-01-16T08:50:48.931Z" itemprop="datePublished">2023-01-16</time>
+    <a href="/2023/02/15/%5BSUCTF%202019%5DEasySQL1/" class="article-date">
+  <time class="dt-published" datetime="2023-02-15T14:48:28.944Z" itemprop="datePublished">2023-02-15</time>
 </a>
     
   </div>
@@ -83,12 +83,140 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>1235456</p>
+        <p>（1）先试试1</p>
+<p>有回显<br>（2）再试试字母</p>
+<p>没有回显<br>（3）试试单引号注入</p>
+<p>提示不一样，因此猜测这里有注入点<br>（4）试试有多少列</p>
+<p>还是不成功，因此一般的联合查询在这里不能使用<br>（5）基于时间的盲注和报错注入都需要嵌套联合查询语句来实现，因此可以跳过，直接试试布尔型盲注</p>
+<p>还是不成功<br>2.利用堆叠注入<br>（1）查找所有数据库</p>
+<p>（2）查询所有表名</p>
+<p>（3）查询Flag表中的列</p>
+<p>不成功<br>3.接下来是网上的两种解法,参照了网上大佬们的WP，自己做的一些总结<br>（1）第一种是猜出了源码select $_POST[‘query’] || flag from Flag,<br>sql_mode 设置了 PIPES_AS_CONCAT 时，|| 就是字符串连接符，相当于CONCAT() 函数<br>当 sql_mode 没有设置 PIPES_AS_CONCAT 时 （默认没有设置），|| 就是逻辑或，相当于OR函数<br>第一种就按默认没有配置来进行，此时||就是逻辑或<br>||在命令执行中见过，<br>回顾:<br>command1;command2顺序执行<br>command1 || command2<br>如果command1执行失败，则执行command2<br>command1 &amp;&amp; command2<br>如果command1执行成功，则执行command2</p>
+<p>因此只需要将</p>
+<p>$_POST[‘query’]<br>提交的数据换成*,1(如果直接写的话会被报错，且写在后面会失效)<br>解释:<br>sql&#x3D;select.post[‘query’].”||flag from Flag”;（拼接语句）<br>如果$post[‘query’]的数据为</p>
+<p>*,1<br>sql语句就变成了select *,1||flag from Flag，<br>就是select *,1 from Flag，这样就直接查询出了Flag表中的所有内容。<br>此处的1是临时增加一列，列名为1且这一列的所有值都为1</p>
+<p>执行payload：*,1</p>
+<p>得到flag</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/01/16/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/" data-id="clcykiah60000u8l24tbxe9rb" data-title="" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2023/02/15/[SUCTF%202019]EasySQL1/" data-id="cle5sjeya0000dsl2bsi19fqi" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-[强网杯 2019]随便注 1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/02/15/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/" class="article-date">
+  <time class="dt-published" datetime="2023-02-15T14:38:27.366Z" itemprop="datePublished">2023-02-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>1、进入网站</p>
+<p>2、看到一个输入框一个提交框，尝试进行数据输入了解大致情况<br>经过尝试我们发现，只有输入1，2时有显示，输入0或者其他时没有显示<br>3、测试是否存在注入<br>and 1&#x3D;1和and 1&#x3D;2没有变化</p>
+<p>在参数后面加单引号，发现错误，可以尝试进行注入</p>
+<p>4、尝试0‘ or ‘1’&#x3D;’1；0” or “1”&#x3D;”1等，发现可行</p>
+<p>5、尝试order by+数字，直至返回错误，获得表中的列树；#号用来注释掉后面的命令</p>
+<p>1’ order by 2#<br>2’ order by 3#</p>
+<p>发现3的时候报错，所以表中只有两列数据<br>6、联合查询，发现select等操作被过滤</p>
+<p>1’ union select 1,2</p>
+<p>7、获取表名，发现有两个表</p>
+<p>0’; show tables;#</p>
+<p>8、获取表中的列名，发现被查询的是words表，而flag在另一个表中，我们需要获取其中的饿内容</p>
+<p>0’; show columns from words;#<br>0’; show columns from <code>1919810931114514</code>;#<br>1<br>2</p>
+<p>9、更改表名列名（偷天换日）</p>
+<p>因为查询是在words中查询id的，所以我们将表1919810931114514改名为words，将words改名为其余的名字。同时将flag属性改名为id属性，类型为varchar(100)</p>
+<p>0’;rename table <code>words</code> to words2;rename table <code>1919810931114514</code> to words;alter table words change flag id varchar(100);show tables;#<br>1</p>
+<p>10、查看改之后的words表中的所有内容获得flag</p>
+<p>1’ or ‘1’&#x3D;’1</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/02/15/[%E5%BC%BA%E7%BD%91%E6%9D%AF%202019]%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/" data-id="clcvzf99m0000cgl245uc1oi5" data-title="" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-解密解答" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/" class="article-date">
+  <time class="dt-published" datetime="2023-02-15T14:30:42.943Z" itemprop="datePublished">2023-02-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>1.前文：<br>        在做CTF的misc题目时经常会碰到需要密码的zip文件，打开这种需要密码的方法无非就这三种：</p>
+<pre><code>   （1）根据提示或其他文件解出密码
+
+   （2）暴力破解
+
+   （3）伪加密修改
+
+    在这里我们讲一下第三个伪加密的原理和修改方法。
+</code></pre>
+<p>2.原理：<br>        1.压缩源文件数据区：<br>          50 4B 03 04：这是头文件标记  （0x04034b50）<br>          14 00：解压文件所需 pkware 版本<br>          00 00：全局方式位标记（判断有无加密）<br>          08 00：压缩方式<br>          5A 7E：最后修改文件时间<br>          F7 46：最后修改文件日期</p>
+<pre><code>      2.压缩源文件目录区：
+     50 4B 01 02：目录中文件文件头标记  （0x02014b50）
+     1F 00：压缩使用的 pkware 版本
+     14 00：解压文件所需 pkware 版本
+     00 00：全局方式位标记（判断是否为伪加密）
+     08 00：压缩方式
+      5A 7E：最后修改文件时间
+      F7 46：最后修改文件日期
+
+      3.压缩源文件目录结束标志：
+     50 4B 05 06：目录结束标记
+     00 00：当前磁盘编号
+     00 00：目录区开始磁盘编号
+     01 00：本磁盘上纪录总数
+     01 00：目录区中纪录总数
+     59 00 00 00：目录区尺寸大小
+     3E 00 00 00：目录区对第一张磁盘的偏移量
+     00 00：ZIP 文件注释长度
+</code></pre>
+<p>3.判断是否加密：<br>        注意：</p>
+<p>全局方式位标记的四个数字中只有第二个数字对其有影响，其它的不管为何值，都不影响它的加密属性，即：<br>                                             第二个数字为奇数时 –&gt;加密<br>                                             第二个数字为偶数时 –&gt;未加密</p>
+<pre><code>    1.无加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为00 00  （50 4B 03 04 14 00 后）<br>且压缩源文件目录区的全局方式位标记应当为00 00   （50 4B 01 02 14 00 后）</p>
+<pre><code>    2.伪加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为 00 00  （50 4B 03 04 14 00 后）<br>且压缩源文件目录区的全局方式位标记应当为 09 00   （50 4B 01 02 14 00 后）</p>
+<pre><code>    3.真加密：
+</code></pre>
+<p>压缩源文件数据区的全局方式位标记应当为09 00  （50 4B 03 04 14 00 后） </p>
+<p>且压缩源文件目录区的全局方式位标记应当为09 00  （50 4B 01 02 14 00 后） </p>
+<p>4.修改方法：<br>        确定是伪加密后就需要将其修改为无加密，方法很简单，就是将压缩源文件目录区的全局方式位标记从09 00改为00 00。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/" data-id="cle5sjeyi0001dsl2gkgtcobm" data-title="" class="article-share-link">Share</a>
       
       
       
@@ -151,49 +279,6 @@
 
 
   
-    <article id="post-[强网杯 2019]随便注 1" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/01/14/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/" class="article-date">
-  <time class="dt-published" datetime="2023-01-14T12:23:22.728Z" itemprop="datePublished">2023-01-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/01/14/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/">强网杯 2019随便注 1</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>首先打开是这个网页<br><img src="https://huatu.98youxi.com/markdown/work/uploads/upload_7bb7959d80d7ea3790455f58525729f1.png"><br><strong>
-        
-          <p class="article-more-link">
-            <a href="/2023/01/14/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2023/01/14/[%E5%BC%BA%E7%BD%91%E6%9D%AF%202019]%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/" data-id="clcvzf99m0000cgl245uc1oi5" data-title="强网杯 2019随便注 1" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
 </section>
@@ -212,7 +297,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">January 2023</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/02/">February 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">January 2023</a></li></ul>
     </div>
   </div>
 
@@ -225,15 +310,19 @@
       <ul>
         
           <li>
-            <a href="/2023/01/16/%E6%9C%AA%E5%91%BD%E5%90%8D%E7%9A%84Markdown%E6%96%87%E4%BB%B6/">(no title)</a>
+            <a href="/2023/02/15/%5BSUCTF%202019%5DEasySQL1/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/15/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/02/15/%E8%A7%A3%E5%AF%86%E8%A7%A3%E7%AD%94/">(no title)</a>
           </li>
         
           <li>
             <a href="/2023/01/14/hello-world/">Hello World</a>
-          </li>
-        
-          <li>
-            <a href="/2023/01/14/%5B%E5%BC%BA%E7%BD%91%E6%9D%AF%202019%5D%E9%9A%8F%E4%BE%BF%E6%B3%A8%201/">强网杯 2019随便注 1</a>
           </li>
         
       </ul>
